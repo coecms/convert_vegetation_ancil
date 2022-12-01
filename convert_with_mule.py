@@ -9,6 +9,9 @@ import datetime
 
 stashm = mule.STASHmaster.from_version('8.4')
 
+pseudo_level = 0
+real_t = 0
+
 for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shiftedAusNZ.nc" ):
 ### Load netcdf
     dataset = Dataset(filename)
@@ -86,14 +89,23 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 break
 
         
-        #for t in range(len(dataset[var])):
-        for t in range(len(dataset['t'])):
-            try:
-                field_3d = dataset[var][t]
-            except IndexError:
-                ### This must be field1384 - this field needs to repeat 5 times
-                field_3d=dataset[var][t%12]
+        for t in range(len(dataset[var])):
+            field_3d = dataset[var][t]
+
+            ### So in this dataset, we have 5 pseudo-levels cross 12 months climatology
+            ### we need to uncross this
             for pli in range(len(field_3d)):
+
+                if filename == "n48.veg.func_seas.shiftedAusNZ.nc":
+                    if var == 'field1384':
+                        pseudo_level = 0
+                        real_t = t
+                    else:
+                        pseudo_level = t%5 + 1
+                        real_t = t//5
+                elif filename == "n48.veg.func_igbp.shiftedAusNZ.nc":
+                    pseudo_level = int(dataset[z_var][pli].data.item())
+                    real_t = t
 
                 field_2d = field_3d[pli]
                 out_field_2d = np.where(field_2d.mask,missing_data_value,field_2d)
@@ -112,10 +124,10 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 new_field.lbfc = int(var[5:])
 
                 ### Derive time bounds
-                if isinstance(dataset['t'][t],np.float32):
-                    field_start_time = start_time + datetime.timedelta(days=dataset['t'][t].item())
-                elif isinstance(dataset['t'][t],np.ma.core.MaskedArray):
-                    field_start_time = start_time + datetime.timedelta(days=dataset['t'][t].data.item())
+                if isinstance(dataset['t'][real_t],np.float32):
+                    field_start_time = start_time + datetime.timedelta(days=dataset['t'][real_t].item())
+                elif isinstance(dataset['t'][real_t],np.ma.core.MaskedArray):
+                    field_start_time = start_time + datetime.timedelta(days=dataset['t'][real_t].data.item())
                 else:
                     raise TypeError
             
@@ -147,7 +159,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 new_field.lbpack = 0 ### No packing
                 new_field.lbuser1 = 1 ### Real field
                 new_field.lbuser3 = 0 ### Boundary datasets - not relevant
-                new_field.lbuser5 = int(dataset[z_var][pli].data.item()) ### Pseudo-level for this field
+                new_field.lbuser5 = pseudo_level ### Pseudo-level for this field
                 new_field.lbuser6 = 0 ### Unused
                 new_field.lbuser7 = 1 #### Atmosphere
                 new_field.lbtim = time_type ### Time indicator
