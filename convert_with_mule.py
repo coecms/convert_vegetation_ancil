@@ -88,7 +88,6 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 stash_id=int(k)
                 break
 
-        
         for t in range(len(dataset[var])):
             field_3d = dataset[var][t]
 
@@ -108,7 +107,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                     real_t = t
 
                 field_2d = field_3d[pli]
-                out_field_2d = np.where(field_2d.mask,missing_data_value,field_2d)
+                out_field_2d = field_2d.filled(missing_data_value)
 
                 new_field = mule.Field2.empty()
 
