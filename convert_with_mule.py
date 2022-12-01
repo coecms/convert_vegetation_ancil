@@ -96,13 +96,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
             for pli in range(len(field_3d)):
 
                 field_2d = field_3d[pli]
-
-                out_field_2d = np.full((dataset.dimensions['latitude'].size,dataset.dimensions['longitude'].size),missing_data_value)
-                ### Fill the missing values
-                for i in range(len(field_2d)):
-                    for j in range(len(field_2d[i])):
-                        if field_2d[i][j]:
-                            out_field_2d[i][j] = field_2d[i][j]
+                out_field_2d = np.where(field_2d.mask,missing_data_value,field_2d)
 
                 new_field = mule.Field2.empty()
 
@@ -156,7 +150,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 new_field.lbuser5 = int(dataset[z_var][pli].data.item()) ### Pseudo-level for this field
                 new_field.lbuser6 = 0 ### Unused
                 new_field.lbuser7 = 1 #### Atmosphere
-                new_field.lbtim = 0 ### Time indicator - 360 day calendar
+                new_field.lbtim = time_type ### Time indicator
                 new_field.lblev = 8888 ### level code - 8888
                 new_field.lbproc = 0 ### "None of the above"
                 new_field.lbvc = 129 ### Vertical coord type - 129 = surface
