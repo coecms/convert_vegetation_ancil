@@ -38,7 +38,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
     template['real_constants']['north_pole_lat'] = 90.0
     template['real_constants']['north_pole_lon'] = 0.0
 
-    start_time =  cftime.datetime.strptime(dataset.variables['t'].time_origin,'%d-%b-%Y:%H:%M:%S',calendar=dataset.variables['t'].calendar)
+    start_time =  cftime.datetime.strptime(dataset.variables['t'].time_origin,'%d-%b-%Y:%H:%M:%S',calendar=dataset.variables['t'].calendar).replace(day=15)
 
     ### Valid times
     template['fixed_length_header'] = {}
@@ -47,17 +47,19 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
     template['fixed_length_header']['t1_day'] = start_time.day
     template['fixed_length_header']['t1_hour'] = start_time.hour
     template['fixed_length_header']['t1_minute'] = start_time.minute
-    template['fixed_length_header']['t1_second'] = start_time.second
+    template['fixed_length_header']['t1_second'] = 0
+    template['fixed_length_header']['t1_year_day_number'] = 0
 
     ### Valid end time for seasonal file
     if filename == "n48.veg.func_seas.shiftedAusNZ.nc":
-        end_time = (start_time + datetime.timedelta(days=dataset['t'][-1].data.item())).replace(day=30)
+        end_time = (start_time + datetime.timedelta(days=dataset['t'][-1].data.item())).replace(day=15)
         template['fixed_length_header']['t2_year'] = end_time.year
         template['fixed_length_header']['t2_month'] = end_time.month
         template['fixed_length_header']['t2_day'] = end_time.day
         template['fixed_length_header']['t2_hour'] = end_time.hour
         template['fixed_length_header']['t2_minute'] = end_time.minute
-        template['fixed_length_header']['t2_second'] = end_time.second
+        template['fixed_length_header']['t2_second'] = 0
+        template['fixed_length_header']['t2_year_day_number'] = (end_time - start_time).days
 
     ### Other important settings
     template['fixed_length_header']['data_set_format_version'] = 15 ### MASS storage
