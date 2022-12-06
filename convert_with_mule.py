@@ -120,7 +120,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 else:
                     raise TypeError
             
-                field_start_time.replace(day=1)
+                field_start_time = field_start_time.replace(day=1)
                 field_end_time = field_start_time.replace(day=30,hour=23,minute=59)
 
                 print(field_end_time)
