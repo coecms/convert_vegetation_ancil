@@ -7,7 +7,7 @@ import numpy as np
 import cftime
 import datetime
 
-stashm = mule.STASHmaster.from_version('8.4')
+stashm = mule.STASHmaster.from_version('7.3')
 
 for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shiftedAusNZ.nc" ):
 ### Load netcdf
@@ -60,13 +60,13 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
         template['fixed_length_header']['t2_second'] = end_time.second
 
     ### Other important settings
-    template['fixed_length_header']['data_set_format_version'] = 20 ### MASS storage
+    template['fixed_length_header']['data_set_format_version'] = 15 ### MASS storage
     template['fixed_length_header']['sub_model'] = 1 ### Atmosphere
-    template['fixed_length_header']['vert_coord_type'] = 5 ### Matches 
+    template['fixed_length_header']['vert_coord_type'] = 1 ### Matches 
     template['fixed_length_header']['dataset_type'] = 4 ### Ancillary dataset
-    template['fixed_length_header']['grid_staggering'] = 6 ### ENDGame
+    template['fixed_length_header']['grid_staggering'] = 3 ### ENDGame
     template['fixed_length_header']['time_type'] = time_type
-    template['fixed_length_header']['model_version'] = 804 ### Based on UM8.4 STASHMaster
+    template['fixed_length_header']['model_version'] = 703 ### Based on UM7.3 STASHMaster
     template['fixed_length_header']['horiz_grid_type'] = 0 ### Global grid
     template['fixed_length_header']['calendar'] = 2 ### 360 day calendar
 
@@ -108,6 +108,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 new_field.lbrow = dataset.dimensions['latitude'].size
                 new_field.bzy = -90.0 - template['real_constants']['row_spacing']
                 new_field.bdy = template['real_constants']['row_spacing']
+                new_field.bmks = 1.0
 
                 new_field.lbfc = int(var[5:])
 
@@ -141,7 +142,7 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 new_field.lbdayd = 0
 
                 ### Constants derived from existing ancils and F03
-                new_field.lbrel = 3 ### UM >=vn8.1
+                new_field.lbrel = 2 ### UM <vn8.1
                 new_field.lbcode = 1 ### Regular lat/lon grid
                 new_field.lbhem = 0 ### Global
                 new_field.lbpack = 0 ### No packing
@@ -158,6 +159,20 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 new_field.bplat = 90.0 ### Pole latitude
                 new_field.lbext = 0 ### No extra data
                 new_field.lbft = 0 ### No forecast period
+                new_field.lbproj = 900 ### fields file projection number
+                new_field.lbuser2 = 1 ### data start
+                new_field.lbsrce = 1111 ### If YYYY=1111, Words 39-45 = LBUSER area for UM use.
+
+
+                ### Various things that need to be 0
+                new_field.lbrvc = 0 ### Vertical co-ordinate type for reference level. Always zero.
+                new_field.lbcfc = 0 ### LBCFC Second field code (=0 in UM)
+                new_field.lbexp = 0 ### Experiment number (optional parameter for users reference only).
+                new_field.lbtyp = 0 ### CF Field code
+                new_field.lbrsvd1 = 0
+                new_field.lbrsvd2 = 0
+                new_field.lbrsvd3 = 0
+                new_field.lbrsvd4 = 0
 
                 array_provider = mule.ArrayDataProvider(out_field_2d)
                 new_field.set_data_provider(array_provider)
