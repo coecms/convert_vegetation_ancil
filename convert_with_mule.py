@@ -1,4 +1,4 @@
-#!/g/data/hh5/public/apps/miniconda3/envs/analysis3-22.07/bin/python3
+#!/g/data/hh5/public/apps/miniconda3/envs/analysis3-22.10/bin/python3
 
 import os
 import mule
@@ -60,6 +60,19 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
         template['fixed_length_header']['t2_minute'] = end_time.minute
         template['fixed_length_header']['t2_second'] = 0
         template['fixed_length_header']['t2_year_day_number'] = (end_time - start_time).days
+
+        ### Interval between valid times
+        template['fixed_length_header']['t3_year'] = 0
+        template['fixed_length_header']['t3_month'] = 1
+        template['fixed_length_header']['t3_day'] = 0
+        template['fixed_length_header']['t3_hour'] = 0
+        template['fixed_length_header']['t3_minute'] = 0
+        template['fixed_length_header']['t3_second'] = 0
+        template['fixed_length_header']['t3_year_day_number'] = 0
+
+        ### Other important values for the seasonal file
+        template['fixed_length_header']['total_prognostic_fields'] = 180 ### 3*60
+        template['integer_constants']['num_field_types'] = 15
 
     ### Other important settings
     template['fixed_length_header']['data_set_format_version'] = 15 ### MASS storage
