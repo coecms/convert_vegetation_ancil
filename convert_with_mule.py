@@ -38,28 +38,73 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
     template['real_constants']['north_pole_lat'] = 90.0
     template['real_constants']['north_pole_lon'] = 0.0
 
-    start_time =  cftime.datetime.strptime(dataset.variables['t'].time_origin,'%d-%b-%Y:%H:%M:%S',calendar=dataset.variables['t'].calendar).replace(day=15)
 
-    ### Valid times
     template['fixed_length_header'] = {}
-    template['fixed_length_header']['t1_year'] = start_time.year
-    template['fixed_length_header']['t1_month'] = start_time.month
-    template['fixed_length_header']['t1_day'] = start_time.day
-    template['fixed_length_header']['t1_hour'] = start_time.hour
-    template['fixed_length_header']['t1_minute'] = start_time.minute
-    template['fixed_length_header']['t1_second'] = 0
-    template['fixed_length_header']['t1_year_day_number'] = 0
-
-    ### Valid end time for seasonal file
+    ### Valid times for seasonal file
     if filename == "n48.veg.func_seas.shiftedAusNZ.nc":
-        end_time = (start_time + datetime.timedelta(days=dataset['t'][-1].data.item())).replace(day=15)
+
+        start_day = 16
+        start_time =  cftime.datetime.strptime(dataset.variables['t'].time_origin,'%d-%b-%Y:%H:%M:%S',calendar=dataset.variables['t'].calendar).replace(day=start_day)
+
+        template['fixed_length_header']['t1_year'] = start_time.year
+        template['fixed_length_header']['t1_month'] = start_time.month
+        template['fixed_length_header']['t1_day'] = start_time.day
+        template['fixed_length_header']['t1_hour'] = start_time.hour
+        template['fixed_length_header']['t1_minute'] = start_time.minute
+        template['fixed_length_header']['t1_second'] = 0
+        template['fixed_length_header']['t1_year_day_number'] = start_day
+
+
+        end_time = (start_time + datetime.timedelta(days=dataset['t'][-1].data.item())).replace(day=start_day)
         template['fixed_length_header']['t2_year'] = end_time.year
         template['fixed_length_header']['t2_month'] = end_time.month
         template['fixed_length_header']['t2_day'] = end_time.day
         template['fixed_length_header']['t2_hour'] = end_time.hour
         template['fixed_length_header']['t2_minute'] = end_time.minute
         template['fixed_length_header']['t2_second'] = 0
-        template['fixed_length_header']['t2_year_day_number'] = (end_time - start_time).days
+        template['fixed_length_header']['t2_year_day_number'] = (end_time - start_time).days + start_day
+
+        ### Interval between valid times
+        template['fixed_length_header']['t3_year'] = 0
+        template['fixed_length_header']['t3_month'] = 1
+        template['fixed_length_header']['t3_day'] = 0
+        template['fixed_length_header']['t3_hour'] = 0
+        template['fixed_length_header']['t3_minute'] = 0
+        template['fixed_length_header']['t3_second'] = 0
+        template['fixed_length_header']['t3_year_day_number'] = 0
+
+        ### Other important values for the seasonal file
+        template['fixed_length_header']['total_prognostic_fields'] = 180 ### 3*60
+        template['integer_constants']['num_field_types'] = 15
+
+    ### Set all of these to the same value for the other file
+    elif filename == "n48.veg.func_igbp.shiftedAusNZ.nc":
+
+        start_time =  cftime.datetime.strptime(dataset.variables['t'].time_origin,'%d-%b-%Y:%H:%M:%S',calendar=dataset.variables['t'].calendar).replace(day=1)
+
+        template['fixed_length_header']['t1_year'] = start_time.year
+        template['fixed_length_header']['t1_month'] = start_time.month
+        template['fixed_length_header']['t1_day'] = start_time.day
+        template['fixed_length_header']['t1_hour'] = start_time.hour
+        template['fixed_length_header']['t1_minute'] = start_time.minute
+        template['fixed_length_header']['t1_second'] = 0
+        template['fixed_length_header']['t1_year_day_number'] = 0
+
+        template['fixed_length_header']['t2_year'] = start_time.year
+        template['fixed_length_header']['t2_month'] = start_time.month
+        template['fixed_length_header']['t2_day'] = start_time.day
+        template['fixed_length_header']['t2_hour'] = start_time.hour
+        template['fixed_length_header']['t2_minute'] = start_time.minute
+        template['fixed_length_header']['t2_second'] = 0
+        template['fixed_length_header']['t2_year_day_number'] = 0
+
+        template['fixed_length_header']['t3_year'] = 0
+        template['fixed_length_header']['t3_month'] = 0
+        template['fixed_length_header']['t3_day'] = 0
+        template['fixed_length_header']['t3_hour'] = 0
+        template['fixed_length_header']['t3_minute'] = 0
+        template['fixed_length_header']['t3_second'] = 0
+        template['fixed_length_header']['t3_year_day_number'] = 0
 
         ### Interval between valid times
         template['fixed_length_header']['t3_year'] = 0
@@ -194,4 +239,5 @@ for filename in ( "n48.veg.func_igbp.shiftedAusNZ.nc", "n48.veg.func_seas.shifte
                 new_ancil.fields.append(new_field)
                 
     ### write file
-    new_ancil.to_file(f"{os.path.splitext(filename)[0]}.ancil")
+    #new_ancil.to_file(f"{os.path.splitext(filename)[0]}.ancil")
+    new_ancil.to_file(f"{filename.split('.')[2]}.ancil")
